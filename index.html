@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FIVE NIGHTS AT TERRY'S</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; margin: 0; overflow: hidden; }
+        #game-container { width: 100vw; height: 100vh; position: relative; background: #000; }
+
+        /* --- CRT EFFECT --- */
+        .crt::before {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 200; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loading {
+            position: absolute; inset: 0; background: black; z-index: 1000;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        #loading img { width: 500px; border: 2px solid #333; filter: grayscale(1) contrast(1.5); }
+        #progress-container { width: 500px; height: 10px; border: 1px solid #0f0; margin-top: 20px; }
+        #progress-bar { width: 0%; height: 100%; background: #0f0; }
+
+        /* --- OFFICE --- */
+        #office {
+            width: 100%; height: 100%; display: none;
+            background: url('IMG_5478.jpeg') center/cover;
+            transition: transform 0.1s;
+        }
+
+        /* --- CAMERA SYSTEM --- */
+        #monitor {
+            position: absolute; inset: 0; background: #000; z-index: 500; display: none;
+            border: 20px solid #222;
+        }
+        #cam-feed { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6) sepia(0.2) hue-rotate(100deg); }
+        #static {
+            position: absolute; inset: 0; opacity: 0.1; pointer-events: none;
+            background: url('https://media.giphy.com/media/oEI9uWUic8pda/giphy.gif');
+        }
+
+        /* --- UI ELEMENTS --- */
+        .ui-box { position: absolute; background: rgba(0,0,0,0.7); border: 2px solid #0f0; padding: 10px; z-index: 600; }
+        #clock { top: 20px; right: 20px; font-size: 30px; }
+        #power { bottom: 20px; left: 20px; font-size: 20px; }
+        
+        .map { bottom: 20px; right: 20px; width: 200px; height: 150px; background: rgba(0,20,0,0.8); }
+        .cam-btn { 
+            background: #040; color: #0f0; border: 1px solid #0f0; 
+            padding: 5px; cursor: pointer; margin: 2px; font-size: 10px;
+        }
+        .cam-btn:hover { background: #0f0; color: #000; }
+
+        #flip-monitor {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 400px; height: 40px; background: rgba(0,255,0,0.2);
+            border: 2px solid #0f0; cursor: pointer; text-align: center; line-height: 40px;
+        }
+
+        /* --- DOORS --- */
+        #door-l {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 15%;
+            background: #111; border-right: 10px solid #333; display: none; z-index: 100;
+        }
+        #btn-door { position: absolute; left: 17%; top: 50%; background: red; color: white; padding: 20px; cursor: pointer; }
+
+        /* --- JUMPSCARE --- */
+        #scare-layer {
+            position: absolute; inset: 0; z-index: 2000; display: none;
+            background: #000; 
+        }
+        #scare-layer img { width: 100%; height: 100%; object-fit: cover; animation: shake 0.1s infinite; }
+        @keyframes shake { 0% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } 100% { transform: translate(5px, -5px); } }
+    </style>
+</head>
+<body class="crt">
+
+<div id="game-container">
+    <div id="loading">
+        <h1 style="letter-spacing: 10px;">TERRY'S</h1>
+        <img src="IMG_5510.jpeg" alt="Title Image">
+        <div id="progress-container"><div id="progress-bar"></div></div>
+        <p>REMOTE CONNECTION ESTABLISHED...</p>
+    </div>
+
+    <div id="office">
+        <div id="door-l"></div>
+        <button id="btn-door" onclick="toggleDoor()">DOOR</button>
+        
+        <div class="ui-box" id="clock">12:00 AM</div>
+        <div class="ui-box" id="power">POWER: 100% | USAGE: ></div>
+        
+        <div id="flip-monitor" onmouseover="toggleMonitor()">CAMERAS</div>
+    </div>
+
+    <div id="monitor">
+        <div id="static"></div>
+        <img id="cam-feed" src="">
+        <div class="ui-box map">
+            <p style="font-size: 10px; margin: 0;">SECURITY MAP</p>
+            <button class="cam-btn" onclick="changeCam(1, 'IMG_5473.jpeg')">CAM 01 (CAR)</button><br>
+            <button class="cam-btn" onclick="changeCam(2, 'unnamed.jpg')">CAM 02 (HALL)</button>
+        </div>
+        <div id="flip-monitor" style="bottom: 10px; background: rgba(255,0,0,0.3);" onclick="toggleMonitor()">EXIT MONITOR</div>
+    </div>
+
+    <div id="scare-layer">
+        <img src="IMG_5491.jpeg">
+        <div style="position: absolute; top: 40%; width: 100%; text-align: center; color: red; font-size: 80px;">TERMINATED</div>
+    </div>
+</div>
+
+<script>
+    let power = 100;
+    let hour = 0;
+    let doorOpen = true;
+    let monitorOpen = false;
+    let terryPos = 1; // 1: Parking, 2: Hallway, 3: At Door
+
+    // 1. Loading
+    let loadPercent = 0;
+    const loadInt = setInterval(() => {
+        loadPercent += 1;
+        document.getElementById('progress-bar').style.width = loadPercent + '%';
+        if(loadPercent >= 100) {
+            clearInterval(loadInt);
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('office').style.display = 'block';
+            startNight();
+        }
+    }, 40);
+
+    // 2. Game Logic
+    function startNight() {
+        // Time
+        setInterval(() => {
+            hour++;
+            if(hour > 6) { alert("6 AM: YOU SURVIVED TERRY."); location.reload(); }
+            document.getElementById('clock').innerText = hour + ":00 AM";
+        }, 60000);
+
+        // Power Consumption
+        setInterval(() => {
+            let usage = 1 + (!doorOpen ? 2 : 0) + (monitorOpen ? 1 : 0);
+            power -= (usage * 0.1);
+            document.getElementById('power').innerText = `POWER: ${Math.floor(power)}% | USAGE: ${">".repeat(usage)}`;
+            if(power <= 0) triggerJumpscare();
+        }, 1000);
+
+        // Terry's AI Movement
+        setInterval(() => {
+            if(terryPos < 3) {
+                if(Math.random() > 0.4) terryPos++;
+            } else {
+                if(doorOpen) triggerJumpscare();
+                else { terryPos = 1; console.log("Terry was blocked!"); }
+            }
+            updateFeed();
+        }, 7000);
+    }
+
+    function toggleDoor() {
+        doorOpen = !doorOpen;
+        document.getElementById('door-l').style.display = doorOpen ? 'none' : 'block';
+        document.getElementById('btn-door').style.background = doorOpen ? 'red' : 'green';
+    }
+
+    function toggleMonitor() {
+        monitorOpen = !monitorOpen;
+        document.getElementById('monitor').style.display = monitorOpen ? 'block' : 'none';
+        if(monitorOpen) updateFeed();
+    }
+
+    function changeCam(id, src) {
+        // To make it feel real, we reset the static
+        document.getElementById('static').style.opacity = "0.5";
+        setTimeout(() => document.getElementById('static').style.opacity = "0.1", 100);
+        
+        const feed = document.getElementById('cam-feed');
+        // Terry only shows up if he's actually in that room
+        if(id === 1 && terryPos === 1) feed.src = 'IMG_5473.jpeg';
+        else if(id === 2 && terryPos === 2) feed.src = 'unnamed.jpg';
+        else feed.src = 'IMG_5478.jpeg'; // Default "empty" office
+    }
+
+    function updateFeed() {
+        changeCam(1, 'IMG_5473.jpeg'); // Refresh current view
+    }
+
+    function triggerJumpscare() {
+        document.getElementById('scare-layer').style.display = 'block';
+        // Add a placeholder "Scream" sound if you have a file
+    }
+</script>
+</body>
+</html>
