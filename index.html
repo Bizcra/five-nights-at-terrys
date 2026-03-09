@@ -2,229 +2,229 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FIVE NIGHTS AT TERRY'S: THE DEFINITIVE EDITION</title>
+    <title>5 NIGHTS AT TERRY'S: </title>
     <style>
-        /* --- CORE STYLES --- */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #0f0; font-family: 'Courier New', Courier, monospace; overflow: hidden; user-select: none; }
-        #game-viewport { width: 100vw; height: 100vh; position: relative; display: flex; justify-content: center; align-items: center; background: #050505; }
+        /* --- 1. THE FOUNDATION (CSS) --- */
+        :root { --fnaf-red: #ff0000; --fnaf-green: #00ff00; --fnaf-ui: rgba(0, 0, 0, 0.9); }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: var(--fnaf-green); font-family: 'Courier New', Courier, monospace; overflow: hidden; }
         
-        /* --- CRT & STATIC OVERLAY --- */
-        .crt-overlay { position: absolute; inset: 0; z-index: 1000; pointer-events: none; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02)); background-size: 100% 3px, 3px 100%; }
-        .vignette { position: absolute; inset: 0; z-index: 1001; pointer-events: none; background: radial-gradient(circle, transparent 50%, rgba(0,0,0,0.9) 100%); }
+        #stage { width: 100vw; height: 100vh; position: relative; background: #050505; display: flex; justify-content: center; align-items: center; }
         
-        /* --- MENU SYSTEM --- */
-        #main-menu { position: absolute; inset: 0; z-index: 2000; background: url('IMG_5510.jpeg') center/cover; display: flex; flex-direction: column; justify-content: center; padding-left: 100px; transition: opacity 1s; }
-        .menu-title { font-size: 80px; text-shadow: 5px 5px #f00; margin: 0; }
-        .menu-btn { background: none; border: none; color: #fff; font-family: inherit; font-size: 30px; text-align: left; cursor: pointer; margin: 10px 0; transition: 0.2s; }
-        .menu-btn:hover { color: #f00; padding-left: 20px; }
+        /* SHADER OVERLAYS */
+        .scanline-effect { position: absolute; inset: 0; z-index: 9000; pointer-events: none; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); background-size: 100% 4px, 4px 100%; }
+        .static-grain { position: absolute; inset: 0; z-index: 8999; opacity: 0.05; pointer-events: none; background: url('https://media.giphy.com/media/oEI9uWU9zO5tS/giphy.gif'); }
 
-        /* --- THE OFFICE --- */
-        #office-view { width: 1024px; height: 768px; position: relative; background: url('IMG_5478.jpeg') center/cover; transition: transform 0.05s; display: none; }
-        .door { position: absolute; top: 0; bottom: 0; width: 150px; background: #111; z-index: 50; transition: transform 0.3s ease-in; border-right: 5px solid #444; }
-        #door-left { left: 0; transform: translateY(-100%); }
-        #door-left.closed { transform: translateY(0); }
+        /* OFFICE ENVIRONMENT */
+        #office { width: 1280px; height: 720px; background: url('unnamed (1).png') center/cover; position: relative; border: 10px solid #111; box-shadow: 0 0 50px #000 inset; transition: filter 0.1s; }
+        .door-mesh { position: absolute; top: 0; bottom: 0; width: 200px; background: #151515; z-index: 100; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 4px solid #333; }
+        #left-door { left: 0; transform: translateY(-100%); }
+        #left-door.active { transform: translateY(0); }
 
-        /* --- MONITOR SYSTEM --- */
-        #monitor-overlay { position: absolute; inset: 0; background: #000; z-index: 500; display: none; border: 20px solid #222; }
-        #cam-render { width: 100%; height: 100%; object-fit: contain; filter: brightness(0.6) sepia(0.3) contrast(1.2); }
-        .map-container { position: absolute; bottom: 30px; right: 30px; width: 250px; height: 200px; background: rgba(0,255,0,0.1); border: 2px solid #0f0; padding: 10px; }
-        .cam-node { width: 40px; height: 30px; background: #040; border: 1px solid #0f0; color: #fff; font-size: 10px; cursor: pointer; margin: 5px; }
-        .cam-node.active { background: #0f0; color: #000; }
+        /* INTERACTIVE BUTTONS */
+        .control-panel { position: absolute; left: 220px; top: 40%; display: flex; flex-direction: column; gap: 10px; z-index: 110; }
+        .btn-ui { padding: 15px 25px; background: #200; border: 3px solid var(--fnaf-red); color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-ui:active { transform: scale(0.9); }
+        .btn-ui.on { background: #020; border-color: var(--fnaf-green); }
 
-        /* --- UI COMPONENTS --- */
-        .hud-box { position: absolute; background: rgba(0,0,0,0.8); border: 2px solid #0f0; padding: 15px; z-index: 800; }
-        #time-display { top: 20px; right: 20px; font-size: 35px; }
-        #power-status { bottom: 20px; left: 20px; width: 250px; }
-        .usage-bar { display: inline-block; width: 15px; height: 25px; background: #0f0; margin-left: 3px; }
+        /* TABLET INTERFACE */
+        #tablet-ui { position: absolute; inset: 0; background: #000; z-index: 5000; display: none; border: 30px solid #222; }
+        #cam-stream { width: 100%; height: 100%; object-fit: contain; filter: brightness(0.4) contrast(1.4) grayscale(0.5); }
+        .map-overlay { position: absolute; bottom: 50px; right: 50px; width: 300px; height: 250px; background: rgba(0, 255, 0, 0.05); border: 2px solid var(--fnaf-green); padding: 10px; }
+        .cam-btn { width: 60px; height: 40px; background: #030; border: 1px solid var(--fnaf-green); color: #fff; cursor: pointer; margin: 5px; }
+        .cam-btn.viewing { background: var(--fnaf-green); color: #000; font-weight: bold; }
 
-        /* --- JUMPSCARE --- */
-        #jumpscare-layer { position: absolute; inset: 0; z-index: 5000; display: none; background: #000; }
-        #jumpscare-layer img { width: 100%; height: 100%; object-fit: cover; animation: glitch 0.1s infinite; }
-        @keyframes glitch { 0% { transform: scale(1.1) translate(10px, 0); } 50% { transform: scale(1.0) translate(-10px, 5px); } 100% { transform: scale(1.2) translate(0, -5px); } }
+        /* HUD ELEMENTS */
+        .hud-display { position: absolute; background: var(--fnaf-ui); border: 2px solid var(--fnaf-green); padding: 20px; z-index: 4000; pointer-events: none; }
+        #time-hud { top: 30px; right: 30px; font-size: 40px; text-shadow: 0 0 10px var(--fnaf-green); }
+        #power-hud { bottom: 30px; left: 30px; min-width: 200px; }
+        .power-usage-box { display: flex; gap: 5px; margin-top: 10px; }
+        .usage-bolt { width: 15px; height: 25px; background: var(--fnaf-green); }
+
+        /* JUMPSCARE ANIMATION */
+        #jumpscare-trigger { position: absolute; inset: 0; z-index: 9999; display: none; background: #000; }
+        #jumpscare-trigger img { width: 100%; height: 100%; object-fit: cover; animation: vibrate 0.05s infinite; }
+        @keyframes vibrate { 0% { transform: translate(2px, 2px) rotate(0deg); } 50% { transform: translate(-2px, -2px) rotate(1deg); } 100% { transform: translate(2px, -2px) rotate(-1deg); } }
     </style>
 </head>
 <body>
 
-<div id="game-viewport">
-    <div class="crt-overlay"></div>
-    <div class="vignette"></div>
+<div id="stage">
+    <div class="scanline-effect"></div>
+    <div class="static-grain"></div>
 
-    <audio id="snd-scream" src="scream.mp3" preload="auto"></audio>
-    <audio id="snd-door" src="door_close.mp3" preload="auto"></audio>
-    <audio id="snd-static" src="static.mp3" loop preload="auto"></audio>
-
-    <div id="main-menu">
-        <h1 class="menu-title">5 NIGHTS<br>AT TERRY'S</h1>
-        <p>2026 Edition</p>
-        <button class="menu-btn" onclick="startGame(1)">NEW GAME</button>
-        <button class="menu-btn" onclick="loadGame()">CONTINUE</button>
-        <button class="menu-btn" onclick="alert('Terry is watching.')">OPTIONS</button>
-    </div>
-
-    <div id="office-view">
-        <div id="door-left" class="door"></div>
-        <button onclick="toggleLeftDoor()" style="position:absolute; left:160px; top:50%; z-index:60;">DOOR</button>
+    <div id="office">
+        <div id="left-door" class="door-mesh"></div>
         
-        <div class="hud-box" id="time-display">12:00 AM</div>
-        <div class="hud-box" id="power-status">
-            POWER: <span id="p-val">100</span>%<br>
-            USAGE: <span id="u-bars"></span>
+        <div class="control-panel">
+            <button class="btn-ui" id="door-toggle" onclick="Logic.toggleDoor()">DOOR</button>
+            <button class="btn-ui" id="light-toggle" onmousedown="Logic.light(true)" onmouseup="Logic.light(false)">LIGHT</button>
         </div>
 
-        <div id="monitor-flip" style="position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:500px; height:50px; background:rgba(255,255,255,0.2); text-align:center; line-height:50px; cursor:pointer;" onmouseover="openMonitor()">CAMERAS</div>
+        <div class="hud-display" id="time-hud">12:00 AM</div>
+        <div class="hud-display" id="power-hud">
+            POWER LEFT: <span id="p-rem">100</span>%
+            <div class="power-usage-box" id="u-grid"></div>
+        </div>
+
+        <div id="cam-pullup" style="position:absolute; bottom:0; left:30%; width:40%; height:50px; background:rgba(255,255,255,0.1); border-top:4px solid #fff; text-align:center; line-height:50px; cursor:pointer;" onmouseover="Logic.openCams()">[ MONITOR ]</div>
     </div>
 
-    <div id="monitor-overlay">
-        <img id="cam-render" src="">
-        <div class="map-container">
-            <p>FACILITY MAP</p>
-            <button class="cam-node" id="c1" onclick="switchCam(1)">CAM 1</button>
-            <button class="cam-node" id="c2" onclick="switchCam(2)">CAM 2</button>
-            <button class="cam-node" onclick="closeMonitor()" style="background:red;">EXIT</button>
+    <div id="tablet-ui">
+        <img id="cam-stream" src="">
+        <div class="map-overlay">
+            <h3 style="margin-top:0;">BUILDING MAP</h3>
+            <button class="cam-btn" id="b1" onclick="Logic.switchCam(1)">CAM 1</button>
+            <button class="cam-btn" id="b2" onclick="Logic.switchCam(2)">CAM 2</button>
+            <button class="btn-ui" onclick="Logic.closeCams()" style="width:100%; margin-top:20px; border-color:#fff;">CLOSE SYSTEM</button>
         </div>
     </div>
 
-    <div id="jumpscare-layer">
-        <img src="IMG_5491.jpeg">
+    <div id="jumpscare-trigger">
+        <img src="unnamed (2).png">
     </div>
 </div>
 
 <script>
 /**
- * TERRY_ENGINE_V1.0
- * Deep logic for character AI, Power Grids, and State Management.
+ * TERRY_CORE_LOGIC_V3
+ * Designed for specific file mapping from user screenshots.
  */
 
-const STATE = {
-    power: 100,
-    hour: 0,
-    night: 1,
-    isDoorClosed: false,
-    isMonitorOpen: false,
-    currentCam: 1,
-    terryLocation: 0, // 0: Start, 1: Car, 2: Hallway, 3: Office
-    aiDifficulty: 3,
-    gameActive: false
+const Logic = {
+    // 1. FILE MAPPING (Based on your screenshots)
+    Files: {
+        OFFICE: 'unnamed (1).png',
+        JUMPSCARE: 'unnamed (2).png',
+        CAR_CAM: 'unnamed.png',
+        TITLE: 'IMG_5510.jpeg',
+        BASKETBALL: 'c7d358ef-7dd4-43d6-8aee-292aadeec068.png' // Adjust if name differs
+    },
+
+    // 2. GAME STATE
+    State: {
+        power: 100,
+        hour: 0,
+        isDoorClosed: false,
+        isLightOn: false,
+        isCamOpen: false,
+        terryPos: 0, // 0: Hidden, 1: Car, 2: Hallway, 3: Window
+        activeCam: 1,
+        running: true
+    },
+
+    // 3. ENGINE START
+    boot() {
+        console.log("Terry Engine Online.");
+        this.updatePowerUI(1);
+        this.loopPower();
+        this.loopTime();
+        this.loopAI();
+    },
+
+    // 4. POWER & TIME LOOPS
+    loopPower() {
+        setInterval(() => {
+            if(!this.State.running) return;
+            let usage = 1 + (this.State.isDoorClosed ? 2 : 0) + (this.State.isCamOpen ? 1 : 0) + (this.State.isLightOn ? 1 : 0);
+            this.State.power -= (usage * 0.15);
+            document.getElementById('p-rem').innerText = Math.floor(this.State.power);
+            this.updatePowerUI(usage);
+            if(this.State.power <= 0) this.die("Power Outage");
+        }, 1000);
+    },
+
+    updatePowerUI(count) {
+        const grid = document.getElementById('u-grid');
+        grid.innerHTML = '';
+        for(let i=0; i<count; i++) {
+            let b = document.createElement('div');
+            b.className = 'usage-bolt';
+            grid.appendChild(b);
+        }
+    },
+
+    loopTime() {
+        setInterval(() => {
+            if(!this.State.running) return;
+            this.State.hour++;
+            document.getElementById('time-hud').innerText = (this.State.hour == 7 ? 6 : this.State.hour) + ":00 AM";
+            if(this.State.hour >= 6) this.win();
+        }, 60000);
+    },
+
+    // 5. TERRY AI SYSTEM
+    loopAI() {
+        setInterval(() => {
+            if(!this.State.running) return;
+            let moveChance = Math.random();
+            if(moveChance > 0.6) {
+                if(this.State.terryPos < 3) this.State.terryPos++;
+                else if(!this.State.isDoorClosed) this.die("Caught");
+                else this.State.terryPos = 0;
+                
+                if(this.State.isCamOpen) this.renderCam();
+            }
+        }, 6000);
+    },
+
+    // 6. ACTIONS
+    toggleDoor() {
+        this.State.isDoorClosed = !this.State.isDoorClosed;
+        document.getElementById('left-door').classList.toggle('active');
+        document.getElementById('door-toggle').classList.toggle('on');
+    },
+
+    light(state) {
+        this.State.isLightOn = state;
+        document.getElementById('office').style.filter = state ? 'brightness(1.5) sepia(0.2)' : 'none';
+        document.getElementById('light-toggle').classList.toggle('on', state);
+        
+        // Window Jumpscare check
+        if(state && this.State.terryPos === 3) {
+            console.log("TERRY IS AT THE WINDOW!");
+        }
+    },
+
+    openCams() {
+        this.State.isCamOpen = true;
+        document.getElementById('tablet-ui').style.display = 'block';
+        this.renderCam();
+    },
+
+    closeCams() {
+        this.State.isCamOpen = false;
+        document.getElementById('tablet-ui').style.display = 'none';
+    },
+
+    switchCam(id) {
+        this.State.activeCam = id;
+        this.renderCam();
+    },
+
+    renderCam() {
+        const img = document.getElementById('cam-stream');
+        if(this.State.activeCam === 1) {
+            img.src = (this.State.terryPos === 1) ? this.Files.CAR_CAM : this.Files.OFFICE;
+        } else {
+            img.src = (this.State.terryPos === 2) ? this.Files.BASKETBALL : this.Files.OFFICE;
+        }
+    },
+
+    // 7. ENDINGS
+    die(reason) {
+        this.State.running = false;
+        document.getElementById('jumpscare-trigger').style.display = 'block';
+        setTimeout(() => location.reload(), 3000);
+    },
+
+    win() {
+        this.State.running = false;
+        alert("6:00 AM - TERRY SURVIVED");
+        location.reload();
+    }
 };
 
-// 1. INITIALIZATION
-function startGame(nightNum) {
-    STATE.night = nightNum;
-    STATE.aiDifficulty = nightNum * 2;
-    document.getElementById('main-menu').style.opacity = '0';
-    setTimeout(() => {
-        document.getElementById('main-menu').style.display = 'none';
-        document.getElementById('office-view').style.display = 'block';
-        STATE.gameActive = true;
-        initSystems();
-    }, 1000);
-}
-
-function initSystems() {
-    // Clock System
-    setInterval(() => {
-        if(!STATE.gameActive) return;
-        STATE.hour++;
-        if(STATE.hour >= 6) winNight();
-        document.getElementById('time-display').innerText = STATE.hour + ":00 AM";
-    }, 60000);
-
-    // Power System
-    setInterval(() => {
-        if(!STATE.gameActive) return;
-        let usage = 1 + (STATE.isDoorClosed ? 2 : 0) + (STATE.isMonitorOpen ? 1 : 0);
-        STATE.power -= (usage * 0.15);
-        
-        updatePowerUI(usage);
-        if(STATE.power <= 0) gameOver("Power Failure");
-    }, 1000);
-
-    // AI System
-    setInterval(() => {
-        if(!STATE.gameActive) return;
-        moveTerry();
-    }, 5000);
-}
-
-// 2. POWER UI
-function updatePowerUI(usage) {
-    document.getElementById('p-val').innerText = Math.floor(STATE.power);
-    let bars = "";
-    for(let i=0; i<usage; i++) bars += "<div class='usage-bar'></div>";
-    document.getElementById('u-bars').innerHTML = bars;
-}
-
-// 3. AI LOGIC
-function moveTerry() {
-    let roll = Math.floor(Math.random() * 20);
-    if(roll < STATE.aiDifficulty) {
-        if(STATE.terryLocation < 3) {
-            STATE.terryLocation++;
-            console.log("Terry moved to: " + STATE.terryLocation);
-        } else {
-            if(!STATE.isDoorClosed) {
-                gameOver("Terry Caught You");
-            } else {
-                STATE.terryLocation = 0; // Reset
-                console.log("Terry was blocked by the door!");
-            }
-        }
-        if(STATE.isMonitorOpen) updateCamView();
-    }
-}
-
-// 4. PLAYER ACTIONS
-function toggleLeftDoor() {
-    STATE.isDoorClosed = !STATE.isDoorClosed;
-    document.getElementById('door-left').classList.toggle('closed');
-}
-
-function openMonitor() {
-    STATE.isMonitorOpen = true;
-    document.getElementById('monitor-overlay').style.display = 'block';
-    updateCamView();
-}
-
-function closeMonitor() {
-    STATE.isMonitorOpen = false;
-    document.getElementById('monitor-overlay').style.display = 'none';
-}
-
-function switchCam(id) {
-    STATE.currentCam = id;
-    updateCamView();
-}
-
-function updateCamView() {
-    const feed = document.getElementById('cam-render');
-    if(STATE.currentCam === 1) {
-        feed.src = (STATE.terryLocation === 1) ? 'IMG_5473.jpeg' : 'IMG_5478.jpeg';
-    } else {
-        feed.src = (STATE.terryLocation === 2) ? 'unnamed.jpg' : 'IMG_5478.jpeg';
-    }
-}
-
-// 5. GAME STATES
-function gameOver(reason) {
-    STATE.gameActive = false;
-    document.getElementById('jumpscare-layer').style.display = 'block';
-    document.getElementById('snd-scream').play();
-    setTimeout(() => { location.reload(); }, 3000);
-}
-
-function winNight() {
-    STATE.gameActive = false;
-    alert("NIGHT " + STATE.night + " COMPLETED. TERRY IS IMPRESSED.");
-    localStorage.setItem('terryNight', STATE.night + 1);
-    location.reload();
-}
-
-function loadGame() {
-    let saved = localStorage.getItem('terryNight');
-    if(saved) startGame(parseInt(saved));
-    else startGame(1);
-}
+Logic.boot();
 </script>
 </body>
 </html>
